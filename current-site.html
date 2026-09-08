@@ -1,0 +1,443 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USC Anthropology — navigation replica</title>
+<style>
+  :root{
+    --ink:#191512;
+    --paper:#EFEDE8;
+    --surface:#FFFFFF;
+    --rule:#D6D2C8;
+    --cardinal:#990000;
+    --gold:#FFC72C;
+    --flag:#9A5B00;
+    --edit:#0E5F5F;
+    --dim:#6B655C;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --serif: Georgia, "Times New Roman", serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--mono);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  /* ---------- tool chrome ---------- */
+  .toolbar{
+    position:sticky;top:0;z-index:50;
+    background:var(--ink);color:#EFEDE8;
+    padding:10px 12px 0;
+  }
+  .toolbar h1{
+    margin:0 0 8px;font-size:11px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;color:#9C958A;
+  }
+  .tabs{display:flex;gap:4px}
+  .tab{
+    flex:1;appearance:none;border:0;cursor:pointer;
+    background:#2C2622;color:#B8B1A6;
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+    padding:9px 6px;border-radius:5px 5px 0 0;
+  }
+  .tab[aria-selected="true"]{background:var(--paper);color:var(--ink);font-weight:600}
+  .tab .count{
+    display:inline-block;min-width:16px;margin-left:5px;padding:0 4px;
+    background:var(--gold);color:#191512;border-radius:8px;font-size:10px;font-weight:700;
+  }
+  .tab .count[hidden]{display:none}
+  .panel{padding:14px 12px 60px}
+  .panel[hidden]{display:none}
+  .hint{color:var(--dim);font-size:12px;line-height:1.6;margin:0 0 14px}
+
+  /* ---------- replica: site ---------- */
+  .site{background:var(--surface);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+  .sitebar{background:var(--cardinal);color:#fff;padding:12px 14px;display:flex;align-items:baseline;gap:8px}
+  .sitebar b{font-family:var(--serif);font-size:17px;font-weight:400}
+  .sitebar span{font-size:10px;letter-spacing:.12em;color:#F0B7B7;text-transform:uppercase}
+  .menu{border-bottom:1px solid var(--rule);background:#FAF9F6}
+  .menu ul{list-style:none;margin:0;padding:0}
+  .menu > ul > li{border-bottom:1px solid var(--rule)}
+  .menu > ul > li:last-child{border-bottom:0}
+  .mitem{
+    width:100%;text-align:left;background:none;border:0;cursor:pointer;
+    font-family:var(--serif);font-size:15px;color:var(--ink);
+    padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;
+  }
+  .mitem:hover{background:#F2EFE8}
+  .mitem .car{font-family:var(--mono);font-size:10px;color:var(--dim)}
+  .sub{background:#F5F3EE;border-top:1px solid var(--rule)}
+  .sub[hidden]{display:none}
+  .sub button{
+    width:100%;text-align:left;background:none;border:0;cursor:pointer;
+    font-family:var(--serif);font-size:14px;color:#3A3229;
+    padding:9px 14px 9px 30px;display:block;
+  }
+  .sub button:hover{background:#EAE6DD;color:var(--cardinal)}
+  .sub li + li button{border-top:1px dotted var(--rule)}
+  .ext{font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:6px}
+  .flagdot{color:var(--flag);font-weight:700;margin-left:5px}
+
+  .page{padding:18px 16px 22px}
+  .crumb{font-size:11px;color:var(--dim);margin-bottom:10px;word-break:break-all}
+  .page h2{font-family:var(--serif);font-weight:400;font-size:23px;margin:0 0 4px;line-height:1.25}
+  .kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cardinal);margin:0 0 12px}
+  .page p{font-family:var(--serif);font-size:15.5px;line-height:1.66;margin:0 0 13px;color:#2A241E}
+  .note{
+    font-family:var(--mono);font-size:12px;line-height:1.6;color:#4A3410;
+    background:#FDF3DC;border-left:3px solid var(--gold);padding:9px 11px;margin:0 0 14px;
+  }
+  .copyswitch{display:flex;gap:0;margin:0 0 16px;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+  .copyswitch button{
+    flex:1;border:0;cursor:pointer;background:#fff;color:var(--dim);
+    font-family:var(--mono);font-size:11px;padding:7px 4px;
+  }
+  .copyswitch button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .contact{border-top:1px solid var(--rule);margin-top:18px;padding-top:12px;font-family:var(--serif);font-size:13px;color:#4A443C}
+  .contact b{display:block;font-size:10px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:2px;font-weight:500}
+
+  /* ---------- editor ---------- */
+  .grp{background:var(--surface);border:1px solid var(--rule);border-radius:6px;margin-bottom:10px;overflow:hidden}
+  .grphead{display:flex;align-items:center;gap:6px;padding:8px 9px;background:#F7F5F0;border-bottom:1px solid var(--rule)}
+  .row{display:flex;align-items:center;gap:6px;padding:7px 9px;border-bottom:1px dotted var(--rule)}
+  .row:last-child{border-bottom:0}
+  .row.child{padding-left:20px;background:#FCFBF9}
+  .row.off{opacity:.42}
+  .lbl{
+    flex:1;min-width:0;border:1px solid transparent;background:transparent;
+    font-family:var(--serif);font-size:14px;color:var(--ink);
+    padding:4px 5px;border-radius:4px;
+  }
+  .grphead .lbl{font-weight:700;font-size:14.5px}
+  .lbl:hover{border-color:var(--rule)}
+  .lbl:focus{outline:none;border-color:var(--edit);background:#fff;box-shadow:0 0 0 2px rgba(14,95,95,.13)}
+  .row.edited .lbl{background:#E6F2F2}
+  .btn{
+    appearance:none;border:1px solid var(--rule);background:#fff;cursor:pointer;
+    font-family:var(--mono);font-size:11px;color:#4A443C;
+    width:26px;height:26px;line-height:1;border-radius:4px;flex:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .btn:hover{border-color:var(--ink);color:var(--ink)}
+  .btn:disabled{opacity:.25;cursor:default}
+  .btn.on{background:var(--edit);border-color:var(--edit);color:#fff}
+  .addwrap{padding:7px 9px;background:#F7F5F0;border-top:1px solid var(--rule)}
+  .add{
+    width:100%;border:1px dashed var(--rule);background:transparent;cursor:pointer;
+    font-family:var(--mono);font-size:11px;color:var(--dim);padding:6px;border-radius:4px;
+  }
+  .add:hover{border-color:var(--edit);color:var(--edit)}
+  .actions{display:flex;gap:8px;margin-top:14px}
+  .actions button{
+    flex:1;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;
+    font-family:var(--mono);font-size:12px;padding:10px;border-radius:5px;
+  }
+  .actions button.ghost{background:transparent;color:var(--ink)}
+
+  /* ---------- changes ---------- */
+  .diff{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:12px}
+  .diff h3{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 8px;font-weight:500}
+  .diff ul{list-style:none;margin:0 0 16px;padding:0}
+  .diff li{font-size:13px;line-height:1.55;padding:5px 0 5px 16px;border-bottom:1px dotted var(--rule);position:relative}
+  .diff li:last-child{border-bottom:0}
+  .diff li::before{content:"›";position:absolute;left:2px;color:var(--edit);font-weight:700}
+  .diff .empty{color:var(--dim);font-size:13px;padding:6px 0}
+  .strike{text-decoration:line-through;color:var(--dim)}
+  pre{
+    background:#191512;color:#D9D3C8;font-family:var(--mono);font-size:11px;line-height:1.5;
+    padding:11px;border-radius:5px;overflow-x:auto;margin:0;max-height:340px;
+  }
+  @media (min-width:900px){
+    .panel{max-width:820px;margin:0 auto}
+    .toolbar{padding-left:calc(50% - 410px);padding-right:calc(50% - 410px)}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .sub{animation:drop .16s ease-out}
+    @keyframes drop{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+  }
+</style>
+
+<div class="toolbar">
+  <h1>Navigation replica · dornsife.usc.edu/anth</h1>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-site" aria-selected="true">Site</button>
+    <button class="tab" role="tab" id="t-edit" aria-selected="false">Menu editor</button>
+    <button class="tab" role="tab" id="t-diff" aria-selected="false">Changes<span class="count" id="cnt" hidden>0</span></button>
+  </div>
+</div>
+
+<section class="panel" id="p-site" role="tabpanel">
+  <p class="hint">The menu below behaves like the live site. Tap a heading to open its submenu, tap a link to load that page. Items flagged in amber have an issue noted on the page itself.</p>
+  <div class="site">
+    <div class="sitebar"><b>Department of Anthropology</b><span>USC Dornsife</span></div>
+    <nav class="menu" id="menu"></nav>
+    <div class="page" id="page"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-edit" role="tabpanel" hidden>
+  <p class="hint">Tap any label to rename it. Arrows reorder within a level, the eye hides an item without deleting it, and × removes it. Everything you change appears in the Site tab immediately.</p>
+  <div id="editor"></div>
+  <div class="actions">
+    <button class="ghost" id="reset">Reset to live site</button>
+    <button id="tochanges">Review changes</button>
+  </div>
+</section>
+
+<section class="panel" id="p-diff" role="tabpanel" hidden>
+  <p class="hint">A plain-language summary to hand to the web team, plus the structure as JSON.</p>
+  <div class="diff">
+    <h3>Summary</h3>
+    <ul id="difflist"></ul>
+    <h3>Proposed structure</h3>
+    <pre id="json"></pre>
+  </div>
+  <div class="actions">
+    <button id="copy">Copy summary</button>
+  </div>
+</section>
+
+<script>
+const LIVE = [
+  {label:"People", url:"#", kids:[
+    {label:"Faculty", url:"/anth/people/faculty/", desc:"Card grid of TT and teaching faculty, filterable by category. Paginated across two pages.", flag:"Andrew Lakoff is still listed here. Needs a decision from the chair on a memorial page or in-memoriam note rather than a quiet removal."},
+    {label:"Staff", url:"/anth/people/staff/", desc:"Department staff directory."},
+    {label:"Postdoctoral", url:"/anth/people/postdoctoral-scholars/", desc:"Postdoctoral scholars."},
+    {label:"PhD Students", url:"/anth/people/phd-students/", desc:"Current doctoral cohort."},
+    {label:"Alumni", url:"/anth/graduate/alumni/", desc:"Doctoral alumni and placements.", flag:"Lives under /graduate/ in the URL but appears under People in the menu. Worth deciding which parent it belongs to."}
+  ]},
+  {label:"Graduate", url:"#", kids:[
+    {label:"PhD in Anthropology", url:"/anth/graduate/anthropology-phd-program/", desc:"Program description, requirements, funding package, and the faculty who lead the program."},
+    {label:"Master of Arts in Visual Anthropology", url:"/anth/graduate/master-of-arts-in-visual-anthropology/", desc:"Program page for the visual anthropology MA.", flag:"Not currently active. Pull this item or relabel it as paused before the page is revised."}
+  ]},
+  {label:"Undergraduate", url:"#", kids:[
+    {label:"Why anthropology?", url:"/anth/undergraduate/why-anthropology/", desc:"Recruitment framing for the discipline."},
+    {label:"Majors & Minors (Overview)", url:"/anth/undergraduate/majors-minors-overview/", desc:"Index of all undergraduate degree paths."},
+    {label:"Anthropology Major (B.A.)", url:"/anth/undergraduate/anthropology-ba/", desc:"Core major requirements."},
+    {label:"Visual Anthropology Major (B.A.)", url:"/anth/undergraduate/ba-visual-anthropology/", desc:"Production-based major tied to the Center for Ethnographic Media Arts."},
+    {label:"Global Studies Major (B.A.)", url:"/anth/global-studies/", desc:"Interdisciplinary major grounded in anthropology.", flag:"Sits at the site root rather than under /undergraduate/, unlike its siblings."},
+    {label:"Experiential Learning & Study Abroad (ANTH)", url:"/anth/experiential-learning/", desc:"Field schools, study abroad, and experiential coursework."},
+    {label:"Internships", url:"/anth/internships/", desc:"Internship placements and credit."},
+    {label:"Student Ambassadors", url:"/anth/anth-student-ambassadors/", desc:"Peer recruitment and outreach program."},
+    {label:"Capstone Projects & Awards", url:"/anth/capstone-projects/", desc:"Senior capstone work and departmental prizes."}
+  ]},
+  {label:"Courses", url:"/anth/courses-in-anthropology/", kids:[], desc:"Course descriptions and the link out to the catalogue."},
+  {label:"Events", url:"/anth/event-calendar/", kids:[], desc:"Departmental calendar, pulled from the university event system."},
+  {label:"About", url:"#", kids:[
+    {label:"About the Department", url:"/anth/home/about/", desc:"Longer institutional description, degree inventory, four-field framing."},
+    {label:"Administration and Contact", url:"/anth/home/administration-and-contact/", desc:"Chair, directors of graduate and undergraduate studies, staff contacts.", flag:"Verify the DGS and DUS assignments against the current academic year."},
+    {label:"Resources", url:"/anth/faculty-forms-resources-and-guidelines/", desc:"Faculty forms, guidelines, internal documents."},
+    {label:"Center for Ethnographic Media Arts/Center for Visual Anthropology", url:"/anth/home/center-for-visual-anthropology/", desc:"CEMA and the legacy Center for Visual Anthropology.", flag:"The longest label in the menu by a wide margin. A shorter label would help the whole bar."},
+    {label:"The Ethnography Studio", url:"https://ethnographystudio.org/", ext:true, desc:"External site for the Ethnography Studio."}
+  ]}
+];
+
+const HOME_CURRENT = [
+  "The rise of artificial intelligence, new forms of democracy, and a vastly changing media landscape — this is a moment when new technologies and new ideas are radically changing how human society operates. Who and what counts as “human” is even up for discussion. Given that, it’s a very exciting time to be an anthropologist.",
+  "At the USC Dornsife Department of Anthropology, you’ll study human beings across time and culture. From the first formation of family groups in prehistoric times to the immigrant-led food scene of L.A., you’ll explore humankind in all its complexity. No matter where your interests lead you, hands-on research and fieldwork allow you to uncover real solutions to real problems in the world.",
+  "The USC Dornsife anthropology faculty bring research interests as diverse as their shared human subject. You’ll learn alongside experts in sociopolitical formations, science and technology, social medicine, folklore, experimental ethnography, and ethnographic filmmaking in the form of visual anthropology. Their work helps us look at issues from new points of view, while highlighting the collective ingenuity and interdependence of our human experience.",
+  "By challenging us to hold a mirror up to humankind — one the reflects across so many dimensions — anthropologists do more than surface new knowledge. They help us build and strive toward mutual understanding in a rapidly changing world."
+];
+
+const HOME_DRAFT = [
+  "Anthropology asks how people build the worlds they live in, and what those worlds cost. At USC Dornsife, that question takes our faculty to refugee organizing in northern Italy, to the electricity systems of Beirut and the energy transition in California, to Brazilian labs rearing mosquitoes to fight the diseases they carry, to Maya forest cities and Ancestral Puebloan landscapes of the Colorado Plateau, and to aquifers being remapped as a new legal frontier in Costa Rica.",
+  "You will learn the full range of the discipline: ethnographic fieldwork, archaeology and heritage, language and folklore, and ethnographic film. USC helped make visual anthropology a field, and the Center for Ethnographic Media Arts, the Ethnography Studio, and our Visual Anthropology major keep that work central. Our students do not only read about research. They excavate, interview, film, and finish something of their own: a documentary, a field season, a capstone project.",
+  "That training answers questions no dataset settles on its own. Why aid arrives and still fails the people it was sent to. Why a policy works on paper and not in practice. How communities make claims on institutions and on each other, and who gets written out of the record. Our graduates carry it into medicine and public health, law, museums and cultural resource management, film and media, design, policy, and business.",
+  "Los Angeles is part of the coursework, not the backdrop to it. So is the world our faculty and students work in across the Middle East, Southeast Asia, Latin America, the Pacific, and the American Southwest."
+];
+
+let nav, open = null, current = {home:true}, copyMode = "current";
+const clone = o => JSON.parse(JSON.stringify(o));
+const stamp = n => { n.kids = n.kids || []; n.orig = n.label; n.kids.forEach(stamp); return n; };
+function load(){ nav = clone(LIVE).map(stamp); }
+load();
+
+const $ = id => document.getElementById(id);
+
+/* ---------- site replica ---------- */
+function renderMenu(){
+  const ul = document.createElement("ul");
+  nav.forEach((sec, i) => {
+    if (sec.hidden) return;
+    const li = document.createElement("li");
+    const kids = sec.kids.filter(k => !k.hidden);
+    const b = document.createElement("button");
+    b.className = "mitem";
+    b.innerHTML = `<span>${esc(sec.label)}${sec.flag ? '<span class="flagdot">▲</span>' : ""}</span>` +
+                  (kids.length ? `<span class="car">${open === i ? "▾" : "▸"}</span>` : "");
+    b.onclick = () => { if (kids.length){ open = open === i ? null : i; draw(); } else { go(sec); } };
+    li.appendChild(b);
+    if (kids.length){
+      const sub = document.createElement("ul");
+      sub.className = "sub";
+      if (open !== i) sub.hidden = true;
+      kids.forEach(k => {
+        const kl = document.createElement("li");
+        const kb = document.createElement("button");
+        kb.innerHTML = esc(k.label) + (k.flag ? '<span class="flagdot">▲</span>' : "") + (k.ext ? '<span class="ext">EXTERNAL</span>' : "");
+        kb.onclick = () => go(k);
+        kl.appendChild(kb); sub.appendChild(kl);
+      });
+      li.appendChild(sub);
+    }
+    ul.appendChild(li);
+  });
+  const m = $("menu"); m.innerHTML = ""; m.appendChild(ul);
+}
+
+function go(item){ current = item; drawPage(); }
+
+function drawPage(){
+  const p = $("page");
+  p.innerHTML = "";
+  if (current.home){
+    p.innerHTML = `<p class="crumb">dornsife.usc.edu/anth/</p>
+      <p class="kicker">Landing page</p>
+      <h2>Department of Anthropology</h2>
+      <div class="copyswitch">
+        <button id="cs-a" aria-pressed="${copyMode === "current"}">Current copy</button>
+        <button id="cs-b" aria-pressed="${copyMode === "draft"}">Proposed draft</button>
+      </div>` +
+      (copyMode === "current" ? HOME_CURRENT : HOME_DRAFT).map(t => `<p>${esc(t)}</p>`).join("") +
+      `<div class="contact">
+        <b>Contact</b>Department of Anthropology · (213) 740-1900<br>anthro@dornsife.usc.edu
+      </div>`;
+    $("cs-a").onclick = () => { copyMode = "current"; drawPage(); };
+    $("cs-b").onclick = () => { copyMode = "draft"; drawPage(); };
+    return;
+  }
+  const base = current.ext ? "" : "dornsife.usc.edu";
+  p.innerHTML = `<p class="crumb">${esc(base + (current.url || ""))}</p>
+    <p class="kicker">${current.ext ? "External link" : "Internal page"}</p>
+    <h2>${esc(current.label)}</h2>` +
+    (current.flag ? `<p class="note"><b>Flagged.</b> ${esc(current.flag)}</p>` : "") +
+    `<p>${esc(current.desc || "No description recorded for this page yet.")}</p>`;
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- editor ---------- */
+function renderEditor(){
+  const e = $("editor"); e.innerHTML = "";
+  nav.forEach((sec, i) => {
+    const g = document.createElement("div"); g.className = "grp";
+    g.appendChild(row(sec, i, null, true));
+    sec.kids.forEach((k, j) => g.appendChild(row(k, j, i, false)));
+    const w = document.createElement("div"); w.className = "addwrap";
+    const a = document.createElement("button"); a.className = "add"; a.textContent = "+ add item under " + sec.label;
+    a.onclick = () => { sec.kids.push({label:"New page", url:"/anth/new-page/", kids:[], desc:"Page not yet created."}); draw(); };
+    w.appendChild(a); g.appendChild(w); e.appendChild(g);
+  });
+  const g = document.createElement("div"); g.className = "addwrap";
+  const a = document.createElement("button"); a.className = "add"; a.textContent = "+ add top-level menu heading";
+  a.onclick = () => { nav.push({label:"New section", url:"#", kids:[]}); draw(); };
+  g.appendChild(a); e.appendChild(g);
+}
+
+function row(item, idx, parent, isHead){
+  const list = parent === null ? nav : nav[parent].kids;
+  const r = document.createElement("div");
+  r.className = (isHead ? "grphead" : "row child") + (item.hidden ? " off" : "") +
+                (item.orig && item.orig !== item.label ? " edited" : "");
+  const inp = document.createElement("input");
+  inp.className = "lbl"; inp.value = item.label;
+  inp.oninput = () => { item.label = inp.value; renderMenu(); countChanges(); r.className = r.className.replace(" edited","") + (item.orig !== item.label ? " edited" : ""); };
+  r.appendChild(inp);
+  r.appendChild(mk("↑", () => move(list, idx, -1), idx === 0));
+  r.appendChild(mk("↓", () => move(list, idx, 1), idx === list.length - 1));
+  const eye = mk(item.hidden ? "◌" : "◉", () => { item.hidden = !item.hidden; draw(); });
+  if (item.hidden) eye.classList.add("on");
+  eye.title = "Hide or show";
+  r.appendChild(eye);
+  r.appendChild(mk("×", () => { list.splice(idx, 1); open = null; draw(); }));
+  return r;
+}
+function mk(t, fn, dis){
+  const b = document.createElement("button"); b.className = "btn"; b.textContent = t;
+  b.disabled = !!dis; b.onclick = fn; return b;
+}
+function move(list, i, d){
+  const j = i + d; if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]]; open = null; draw();
+}
+
+/* ---------- changes ---------- */
+function collect(){
+  const out = [];
+  const key = n => n.orig || n.label;
+  const liveTop = LIVE.map(s => s.label);
+  const nowTop = nav.map(s => key(s));
+
+  nav.forEach(sec => {
+    const src = LIVE.find(s => s.label === key(sec));
+    if (!src){ out.push(`Added top-level heading <b>${esc(sec.label)}</b>.`); }
+    else if (src.label !== sec.label){ out.push(`Renamed <span class="strike">${esc(src.label)}</span> to <b>${esc(sec.label)}</b>.`); }
+    if (sec.hidden) out.push(`Hid <b>${esc(sec.label)}</b> and everything under it.`);
+    sec.kids.forEach(k => {
+      const psrc = LIVE.find(s => (s.kids||[]).some(x => x.label === key(k)));
+      const ksrc = psrc && psrc.kids.find(x => x.label === key(k));
+      if (!ksrc){ out.push(`Added <b>${esc(k.label)}</b> under ${esc(sec.label)}.`); return; }
+      if (psrc.label !== key(sec)) out.push(`Moved <b>${esc(k.label)}</b> from ${esc(psrc.label)} to ${esc(sec.label)}.`);
+      if (ksrc.label !== k.label) out.push(`Renamed <span class="strike">${esc(ksrc.label)}</span> to <b>${esc(k.label)}</b>.`);
+      if (k.hidden) out.push(`Hid <b>${esc(k.label)}</b> under ${esc(sec.label)}.`);
+    });
+  });
+
+  LIVE.forEach(s => {
+    if (!nav.some(x => key(x) === s.label)) out.push(`Removed <b>${esc(s.label)}</b> from the menu.`);
+    (s.kids||[]).forEach(k => {
+      const still = nav.some(x => x.kids.some(y => key(y) === k.label));
+      if (!still) out.push(`Removed <b>${esc(k.label)}</b> from the menu.`);
+    });
+  });
+
+  const reordered = nowTop.length === liveTop.length && nowTop.join("|") !== liveTop.join("|") &&
+                    nowTop.every(l => liveTop.includes(l));
+  if (reordered) out.push(`Reordered the top-level menu: ${esc(nav.map(s => s.label).join(" · "))}.`);
+  nav.forEach(sec => {
+    const src = LIVE.find(s => s.label === key(sec));
+    if (!src) return;
+    const a = sec.kids.filter(k => src.kids.some(x => x.label === key(k))).map(k => key(k));
+    const b = src.kids.filter(x => sec.kids.some(k => key(k) === x.label)).map(x => x.label);
+    if (a.length > 1 && a.join("|") !== b.join("|")) out.push(`Reordered items under <b>${esc(sec.label)}</b>.`);
+  });
+  return out;
+}
+
+function countChanges(){
+  const n = collect().length;
+  const c = $("cnt"); c.textContent = n; c.hidden = n === 0;
+}
+
+function renderDiff(){
+  const items = collect();
+  const l = $("difflist");
+  l.innerHTML = items.length ? items.map(i => `<li>${i}</li>`).join("")
+    : `<li class="empty" style="padding-left:0">No changes yet. Rearrange the menu in the editor and they will be listed here.</li>`;
+  $("json").textContent = JSON.stringify(nav.map(s => ({
+    label: s.label, url: s.url, hidden: !!s.hidden,
+    children: s.kids.map(k => ({label:k.label, url:k.url, hidden: !!k.hidden}))
+  })), null, 2);
+}
+
+function draw(){ renderMenu(); renderEditor(); countChanges(); renderDiff(); }
+
+/* ---------- tabs ---------- */
+const tabs = [["t-site","p-site"],["t-edit","p-edit"],["t-diff","p-diff"]];
+tabs.forEach(([t, p]) => $(t).onclick = () => {
+  tabs.forEach(([t2, p2]) => { $(t2).setAttribute("aria-selected", t2 === t); $(p2).hidden = t2 !== t; });
+  if (t === "t-diff") renderDiff();
+  window.scrollTo(0, 0);
+});
+$("tochanges").onclick = () => $("t-diff").click();
+$("reset").onclick = () => { load(); open = null; current = {home:true}; draw(); drawPage(); };
+$("copy").onclick = async () => {
+  const txt = collect().map(s => "- " + s.replace(/<[^>]+>/g, "")).join("\n") || "No changes.";
+  try { await navigator.clipboard.writeText(txt); $("copy").textContent = "Copied"; setTimeout(() => $("copy").textContent = "Copy summary", 1400); }
+  catch { $("copy").textContent = "Copy failed, select the text above"; }
+};
+
+draw(); drawPage();
+</script>

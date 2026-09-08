@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USC Anthropology — proposed site structure</title>
+<style>
+  :root{
+    --ink:#191512; --paper:#EFEDE8; --surface:#FFFFFF; --rule:#D6D2C8;
+    --cardinal:#990000; --gold:#FFC72C; --flag:#9A5B00; --edit:#0E5F5F;
+    --stub:#5B4B8A; --dim:#6B655C;
+    --mono: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --serif: Georgia,"Times New Roman",serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#EDE9E2; --paper:#17150F; --surface:#211E18; --rule:#3B372E;
+      --cardinal:#E4736B; --gold:#E0AE3A; --flag:#D9A341; --edit:#5FBEBE;
+      --stub:#A796DC; --dim:#9A9287;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#EDE9E2; --paper:#17150F; --surface:#211E18; --rule:#3B372E;
+    --cardinal:#E4736B; --gold:#E0AE3A; --flag:#D9A341; --edit:#5FBEBE;
+    --stub:#A796DC; --dim:#9A9287;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%}
+  .toolbar{position:sticky;top:0;z-index:50;background:var(--ink);color:#EFEDE8;padding:10px 12px 0}
+  .toolbar h1{margin:0 0 8px;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#9C958A}
+  .tabs{display:flex;gap:4px}
+  .tab{flex:1;appearance:none;border:0;cursor:pointer;background:#2C2622;color:#B8B1A6;font-family:var(--mono);font-size:12px;padding:9px 6px;border-radius:5px 5px 0 0}
+  .tab[aria-selected="true"]{background:var(--paper);color:var(--ink);font-weight:600}
+  .panel{padding:14px 12px 60px}
+  .panel[hidden]{display:none}
+  .hint{color:var(--dim);font-size:12px;line-height:1.6;margin:0 0 14px}
+  .site{background:var(--surface);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+  .sitebar{background:var(--cardinal);color:#fff;padding:12px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .sitebar b{font-family:var(--serif);font-size:17px;font-weight:400;cursor:pointer}
+  .sitebar span{font-size:10px;letter-spacing:.12em;color:#F0B7B7;text-transform:uppercase}
+  .menu{border-bottom:1px solid var(--rule);background:color-mix(in srgb, var(--surface) 92%, var(--paper));position:relative}
+  .menu ul{list-style:none;margin:0;padding:0}
+  .bar{display:flex;flex-wrap:wrap}
+  .bar > li{position:relative;flex:none;border-right:1px solid var(--rule)}
+  .mitem{background:none;border:0;cursor:pointer;font-family:var(--serif);font-size:14.5px;color:var(--ink);padding:11px 13px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .mitem:hover{background:color-mix(in srgb, var(--edit) 12%, transparent)}
+  .mitem:focus-visible{outline:2px solid var(--edit);outline-offset:-2px}
+  .mitem[aria-expanded="true"]{background:var(--ink);color:#fff}
+  .mitem[aria-expanded="true"] .car{color:#B8B1A6}
+  .mitem .car{font-family:var(--mono);font-size:9px;color:var(--dim)}
+  .sub{position:absolute;top:100%;left:0;z-index:30;min-width:230px;max-width:min(330px,86vw);background:var(--surface);border:1px solid var(--rule);box-shadow:0 6px 18px rgba(25,21,18,.14)}
+  .bar > li.r .sub{left:auto;right:0}
+  .sub[hidden]{display:none}
+  .sub button{width:100%;text-align:left;background:none;border:0;cursor:pointer;font-family:var(--serif);font-size:14px;color:var(--ink);padding:9px 12px;display:block;line-height:1.35}
+  .sub button:hover{background:color-mix(in srgb, var(--edit) 12%, transparent);color:var(--cardinal)}
+  .sub li + li button{border-top:1px dotted var(--rule)}
+  .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;margin-left:6px;padding:1px 4px;border-radius:3px;vertical-align:1px}
+  .t-stub{background:#E9E4F2;color:var(--stub)}
+  .t-flag{background:#FBEFD3;color:var(--flag)}
+  .t-ext{background:#E7E4DD;color:var(--dim)}
+  .page{padding:18px 16px 24px}
+  .crumb{font-size:11px;color:var(--dim);margin-bottom:9px;word-break:break-all}
+  .page h2{font-family:var(--serif);font-weight:400;font-size:23px;margin:0 0 4px;line-height:1.25}
+  .kicker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cardinal);margin:0 0 12px}
+  .page p{font-family:var(--serif);font-size:15.5px;line-height:1.66;margin:0 0 13px;color:var(--ink)}
+  .page h3{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:500;margin:20px 0 8px;padding-top:12px;border-top:1px solid var(--rule)}
+  .page ul.plain{list-style:none;margin:0 0 13px;padding:0}
+  .page ul.plain li{font-family:var(--serif);font-size:14.5px;line-height:1.55;padding:7px 0;border-bottom:1px dotted var(--rule)}
+  .page ul.plain li:last-child{border-bottom:0}
+  .page ul.plain b{font-weight:700}
+  .page ul.plain em{color:var(--dim);font-style:normal;font-family:var(--mono);font-size:11.5px;display:block;margin-top:2px}
+  .prov{font-family:var(--mono);font-size:10.5px;color:var(--dim);border:1px solid var(--rule);border-radius:4px;padding:6px 8px;margin:0 0 14px;line-height:1.5}
+  .note{font-family:var(--mono);font-size:12px;line-height:1.6;color:#4A3410;background:#FDF3DC;border-left:3px solid var(--gold);padding:9px 11px;margin:0 0 14px}
+  .stubbox{font-family:var(--mono);font-size:12px;line-height:1.6;color:#3D3159;background:#F1EEF8;border-left:3px solid var(--stub);padding:9px 11px;margin:0 0 14px}
+  .xlink{background:none;border:0;padding:0;font-family:var(--serif);font-size:14.5px;color:var(--cardinal);cursor:pointer;text-decoration:underline;text-align:left}
+  .grp{background:var(--surface);border:1px solid var(--rule);border-radius:6px;margin-bottom:10px;overflow:hidden}
+  .grphead{display:flex;align-items:center;gap:6px;padding:8px 9px;background:color-mix(in srgb, var(--surface) 88%, var(--paper));border-bottom:1px solid var(--rule)}
+  .row{display:flex;align-items:center;gap:6px;padding:7px 9px;border-bottom:1px dotted var(--rule)}
+  .row:last-child{border-bottom:0}
+  .row.child{padding-left:20px;background:var(--surface)}
+  .row.off{opacity:.42}
+  .lbl{flex:1;min-width:0;border:1px solid transparent;background:transparent;font-family:var(--serif);font-size:14px;color:var(--ink);padding:4px 5px;border-radius:4px}
+  .grphead .lbl{font-weight:700;font-size:14.5px}
+  .lbl:hover{border-color:var(--rule)}
+  .lbl:focus{outline:none;border-color:var(--edit);background:#fff;box-shadow:0 0 0 2px rgba(14,95,95,.13)}
+  .btn{appearance:none;border:1px solid var(--rule);background:#fff;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--dim);width:26px;height:26px;border-radius:4px;flex:none;display:flex;align-items:center;justify-content:center}
+  .btn:hover{border-color:var(--ink);color:var(--ink)}
+  .btn:disabled{opacity:.25;cursor:default}
+  .btn.on{background:var(--edit);border-color:var(--edit);color:#fff}
+  .btn.danger{background:var(--cardinal);border-color:var(--cardinal);color:#fff;width:auto;padding:0 9px}
+  .btn.wide{width:auto;padding:0 9px}
+  .warn{flex:1;font-family:var(--mono);font-size:11px;line-height:1.35;color:var(--cardinal)}
+  .grphead.pending{background:#FBEDED}
+  .addwrap{padding:7px 9px;background:color-mix(in srgb, var(--surface) 88%, var(--paper));border-top:1px solid var(--rule)}
+  .add{width:100%;border:1px dashed var(--rule);background:transparent;cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--dim);padding:6px;border-radius:4px}
+  .add:hover{border-color:var(--edit);color:var(--edit)}
+  .addsec{border-style:solid;border-color:var(--ink);color:var(--ink);background:#fff;padding:9px;margin-top:2px}
+  .actions{display:flex;gap:8px;margin-top:14px}
+  .actions button{flex:1;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;font-family:var(--mono);font-size:12px;padding:10px;border-radius:5px}
+  .actions button.ghost{background:transparent;color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:12px;margin-bottom:10px}
+  .card h3{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 8px;font-weight:500}
+  .card ul{list-style:none;margin:0;padding:0}
+  .card li{font-size:13px;line-height:1.55;padding:6px 0 6px 15px;border-bottom:1px dotted var(--rule);position:relative}
+  .card li:last-child{border-bottom:0}
+  .card li::before{content:"›";position:absolute;left:2px;color:var(--edit);font-weight:700}
+  .tally{display:flex;gap:8px;margin-bottom:12px}
+  .tally div{flex:1;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 8px;text-align:center}
+  .tally b{display:block;font-family:var(--serif);font-size:24px;font-weight:400;line-height:1}
+  .tally span{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+  @media (min-width:900px){
+    .panel{max-width:820px;margin:0 auto}
+    .toolbar{padding-left:calc(50% - 410px);padding-right:calc(50% - 410px)}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .sub{animation:drop .16s ease-out}
+    @keyframes drop{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+  }
+</style>
+
+</head>
+<body>
+<div class="toolbar">
+  <h1>Proposed structure · dornsife.usc.edu/anth · <a href="current-site.html" style="color:#9C958A">compare with current site</a></h1>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-site" aria-selected="true">Site</button>
+    <button class="tab" role="tab" id="t-edit" aria-selected="false">Menu editor</button>
+    <button class="tab" role="tab" id="t-notes" aria-selected="false">Notes</button>
+    <button class="tab" role="tab" id="t-share" aria-selected="false">Layouts</button>
+  </div>
+</div>
+
+<section class="panel" id="p-site" role="tabpanel">
+  <p class="hint">Seven top-level sections. Every page is populated from content already on the live site, rewritten where it was wrong or duplicated. Pages marked <span class="tag t-stub">STUB</span> have no source content and need writing. Pages marked <span class="tag t-flag">CHECK</span> carry an open question.</p>
+  <div class="site">
+    <div class="sitebar"><b id="hb">Department of Anthropology</b><span>USC Dornsife</span></div>
+    <nav class="menu" id="menu"></nav>
+    <div class="page" id="page"></div>
+  </div>
+</section>
+
+<section class="panel" id="p-edit" role="tabpanel" hidden>
+  <p class="hint">Tap any label to rename it. Arrows reorder within a level, the eye hides an item without deleting it, and × removes it. Removing a whole section asks first, since it takes every page under it. Use the buttons at the foot of each group to add pages, or the button at the bottom to add a section. The Site tab updates as you go.</p>
+  <div id="editor"></div>
+  <div class="actions"><button class="ghost" id="reset">Reset structure</button><button id="tonotes">Build notes</button></div>
+  <div class="grp" style="margin-top:14px">
+    <div class="grphead"><span class="warn" style="color:var(--dim)">Save or restore your work. Changes live only in this browser tab and are lost on refresh or when a new file is opened.</span></div>
+    <div class="addwrap">
+      <textarea id="io" rows="4" placeholder="Press Copy structure to export, or paste a saved structure here and press Load structure." style="width:100%;font-family:var(--mono);font-size:11px;border:1px solid var(--rule);border-radius:4px;padding:7px;resize:vertical"></textarea>
+      <div class="actions" style="margin-top:7px">
+        <button class="ghost" id="ioout">Copy structure</button>
+        <button class="ghost" id="ioin">Load structure</button>
+      </div>
+      <p class="hint" id="iomsg" style="margin:7px 0 0"></p>
+    </div>
+  </div>
+</section>
+
+
+<section class="panel" id="p-share" role="tabpanel" hidden>
+  <p class="hint">Each committee member arranges the menu in the Menu editor, then saves it here. Saving produces a link that carries the whole arrangement, so it can be emailed to whoever is collecting them. No account or sign-in is involved. Opening someone's link loads their layout straight into the editor.</p>
+  <div class="grp">
+    <div class="grphead"><span class="warn" style="color:var(--dim)">Save the arrangement currently in the Menu editor</span></div>
+    <div class="addwrap">
+      <input id="sv-name" class="lbl" style="border-color:var(--rule);width:100%;margin-bottom:6px" placeholder="Your name">
+      <input id="sv-note" class="lbl" style="border-color:var(--rule);width:100%" placeholder="Optional: what you were trying to fix">
+      <div class="actions" style="margin-top:7px">
+        <button id="sv-go">Save and copy my link</button>
+        <button class="ghost" id="sv-add">Add a colleague's</button>
+      </div>
+      <textarea id="sv-io" rows="3" placeholder="Your link appears here after saving. To add someone else's, paste their link or JSON and press Add a colleague's." style="width:100%;margin-top:7px;font-family:var(--mono);font-size:11px;border:1px solid var(--rule);border-radius:4px;padding:7px;resize:vertical"></textarea>
+      <p class="hint" id="sv-msg" style="margin:7px 0 0"></p>
+    </div>
+  </div>
+  <div id="layouts"></div>
+</section>
+<section class="panel" id="p-notes" role="tabpanel" hidden>
+  <div class="tally">
+    <div><b id="n-pages">0</b><span>Pages</span></div>
+    <div><b id="n-stub">0</b><span>Stubs</span></div>
+    <div><b id="n-flag">0</b><span>Checks</span></div>
+  </div>
+  <div class="card"><h3>Corrections made to live content</h3><ul id="l-fix"></ul></div>
+  <div class="card"><h3>Open questions</h3><ul id="l-flag"></ul></div>
+  <div class="card"><h3>Pages needing content</h3><ul id="l-stub"></ul></div>
+</section>
+
+<script>
+/* Content below is drawn from the live site (paraphrased), from faculty profile
+   pages, or marked as a stub. Nothing is invented. */
+
+const P = {}; // page store, keyed by id
+
+function page(id, o){ P[id] = Object.assign({id}, o); return id; }
+
+/* ---------------- HOME ---------------- */
+page("home", {
+  title:"Department of Anthropology", kicker:"Landing page", url:"/anth/",
+  prov:"Copy rewritten. Replaces the current four paragraphs, which named no research area, no region, and no degree.",
+  body:[
+    "Anthropology asks how people build the worlds they live in, and what those worlds cost them. That question takes our faculty a long way from campus: to refugee organizing in northern Italy, to the generators that keep the lights on in Beirut and the energy transition reshaping California, to Brazilian labs where researchers raise mosquitoes in order to fight the diseases mosquitoes spread, and to aquifers in Costa Rica that are being remapped as a new legal frontier.",
+    "Here you can learn the whole range of the discipline: ethnographic fieldwork, archaeology and heritage, language and folklore, and ethnographic film. USC helped invent visual anthropology, and that work is still central to us, through the Center for Ethnographic Media Arts, the Ethnography Studio, and our Visual Anthropology major. Students do more than read about research. They interview people, handle artifacts, shoot and edit, and finish something of their own before they graduate.",
+    "The training turns out to be useful in ways that are easy to underestimate. It teaches you to see why a policy that works on paper falls apart in practice, why aid can arrive and still miss the people it was meant for, and how communities make claims on institutions and on each other. Our graduates take that into medicine and public health, law, museums, film, design, policy, and business.",
+    "Los Angeles is part of the coursework rather than the scenery around it. So is the wider world our faculty and students work in, from Europe and the Middle East to Southeast Asia, Latin America, Africa, the Pacific, and the American Southwest."
+  ],
+  links:["res-areas","ug-majors","gr-phd"],
+  contact:true
+});
+
+/* ---------------- RESEARCH ---------------- */
+page("res-areas", {
+  title:"Research areas", kicker:"Research", url:"/anth/research/areas/",
+  prov:"New page. Every entry below is drawn from the named faculty member's own profile page. No area has been created that lacks faculty behind it.",
+  body:["Faculty research clusters into five areas. Each links to the people working in it."],
+  list:[
+    ["Migration, borders, and belonging","Berhane on African refugees and the legal frameworks of the Central Mediterranean crossing, and on Eritrean activists in Italy. Papazian on subjectivity and politics in post-genocide societies, through ethnography among Armenians in Turkey. Hoskins on transnational religion and diaspora across Southeast Asia and California."],
+    ["Science, medicine, and environment","Redfield on circulations of science, technology, and medicine in colonial and postcolonial contexts, and on Doctors Without Borders. Reis-Castro on mosquito science in Brazil and the racialized politics it materializes. Ballestero on water, law, and the reinvention of subterranean space."],
+    ["Infrastructure and social provision","Nucho on the politics of the built environment, fieldwork in Lebanon, and energy transition in California. McLaughlin on social policy, subsidies, services, and unconditional cash in India and the United States."],
+    ["Visual, sonic, and experimental ethnography","Spray at the intersection of ethnography and art, directing the Center for Ethnographic Media Arts. Cool on digital media ecologies and the future of ethnographic film. Ballestero's Ethnography Studio as a space for experimental analysis."],
+    ["Folklore, myth, and the posthuman","Thompson on folklore, mythology, and sociolinguistics."],
+    ["Archaeology and heritage","Archaeology at USC runs on hands-on work with material, and students can start in their first year. At the Archaeology Research Center they handle artifacts directly, learn elemental analysis and digital reconstruction, join faculty-led projects, and design original research. Recent field opportunities have taken students to previously unrecorded Tongva sites on Catalina Island, working with GPS and GIS, and to Old Providence and Santa Catalina Islands in Colombia. Department faculty conduct fieldwork in the American Southwest and work on digital cultural heritage with Indigenous partners. The Archaeology & Heritage Studies major and minor, which the department sponsors, is interdisciplinary by design, drawing on anthropology, art history, chemistry, classics, environmental studies, human biology, linguistics, history, spatial sciences, and religion."]
+  ],
+  note:"The archaeology entry describes what students actually do and then hands off to the program's own pages, which carry the course requirements, project listings, and field opportunities. Nothing is duplicated here that the ARC Lab and program sites already maintain. Two things are deliberately left out until confirmed: named faculty, in the form the other five areas use, and any region beyond the Southwest.",
+  out:[
+    ["Archaeology & Heritage Studies","https://dornsife.usc.edu/arch/"],
+    ["Archaeology Research Center","https://dornsife.usc.edu/arclab/"],
+    ["Archaeology projects and field opportunities","https://dornsife.usc.edu/arclab/archaeology-projects/"],
+    ["Excavation and volunteer opportunities","https://dornsife.usc.edu/arch/resources-and-opportunities/opportunities/"]
+  ],
+  links:["ppl-faculty","res-centers"]
+});
+page("res-centers", {
+  title:"Centers and labs", kicker:"Research", url:"/anth/research/centers/",
+  prov:"Carried over from the existing CEMA page and the Ethnography Studio link, both already in the live menu.",
+  list:[
+    ["Center for Ethnographic Media Arts","Directed by Stephanie Spray. Successor to the Center for Visual Anthropology, which made USC a founding home for the field."],
+    ["The Ethnography Studio","Run by Andrea Ballestero since 2011. An interdisciplinary space for students working on ethnography as a textual form, a research strategy, and a mode of knowledge production. Hosts a public talk and workshop series. External site."],
+    ["Archaeology Research Center","The ARC Lab. Undergraduates work hands-on with artifacts, join faculty-led research projects, and build lab and digital archaeology skills, including elemental analysis and virtual reconstruction. Students can start in their first year and design original research using real archaeological material."]
+  ],
+  flag:"Confirm the Ethnography Studio should stay an outbound link rather than gaining a department page.",
+  out:[
+    ["Center for Ethnographic Media Arts","https://dornsife.usc.edu/cema/"],
+    ["The Ethnography Studio","https://ethnographystudio.org/"],
+    ["Archaeology Research Center","https://dornsife.usc.edu/arclab/"]
+  ]
+});
+page("res-news", {
+  title:"Events and news", kicker:"Events", url:"/anth/events/",
+  prov:"Promoted to a top-level section. Merges the event calendar with the Latest News page, which exists on the live site but is reachable from no department menu.",
+  stub:"Needs a feed configuration and an editorial owner. The calendar already runs on the university event system, and the Ethnography Studio talk and workshop series is a recurring source of listings."
+});
+
+/* ---------------- UNDERGRADUATE ---------------- */
+page("ug-majors", {
+  title:"Majors and minors", kicker:"Undergraduate", url:"/anth/undergraduate/majors-minors/",
+  prov:"Inventory taken from the live Majors & Minors overview, which you have confirmed is the correct source. This page becomes the single authority; every other page links here instead of restating the list.",
+  body:["Anthropology is the primary academic discipline for the study of human culture and social life. These are the degree paths the department offers."],
+  list:[
+    ["Anthropology B.A.","Prepares students for careers in global health and medicine, museums, law, government, environmental management, entrepreneurship and international business, education, and the arts."],
+    ["Sociocultural Anthropology B.A.",""],
+    ["Visual Anthropology B.A.","Students undertake independent research projects, working across a range of visual methods alongside fieldwork."],
+    ["Global Studies B.A.","Interdisciplinary major grounded in anthropology and drawing on political science, international relations, history, languages, and religion. Prepares students for careers requiring cross-cultural proficiency and grounded social analysis: international aid and advocacy, policy, law, media and journalism, business, global health, design, engineering. Honors thesis available."],
+    ["Archaeology & Heritage Studies B.A. and minor","Sponsored by the department and directed by Lynn Swartz Dodd. Interdisciplinary, drawing on art history, anthropology, chemistry, classics, environmental studies, human biology, linguistics, history, spatial sciences, and religion. Nine courses, 36 units, ending in a capstone. Students work with artifacts at the Archaeology Research Center and can join excavation projects."],
+    ["Anthropology minor","Allows students to develop insight into the field without a full major."],
+    ["Medical Anthropology minor",""],
+    ["Food and Society minor",""]
+  ],
+  note:"The Archaeology & Heritage Studies program is missing from the live Majors & Minors overview and appears on the About page under its former name, Interdisciplinary Archaeology. It is active, has its own site and course sheet, and is sponsored by the department, so it is listed here. The About page's other extra items, the urban applied concentration and the folklore and Southeast Asia minors, remain unconfirmed and are not listed.",
+  out:[
+    ["Archaeology & Heritage Studies major information","https://dornsife.usc.edu/arch/archaeology-major-information-page/"],
+    ["Archaeology & Heritage Studies program site","https://dornsife.usc.edu/arch/"]
+  ],
+  links:["ug-advising","ug-beyond"]
+});
+page("ug-beyond", {
+  title:"Beyond the classroom", kicker:"Undergraduate", url:"/anth/undergraduate/beyond-the-classroom/",
+  prov:"Consolidates four separate live menu items: Experiential Learning & Study Abroad, Internships, Capstone Projects & Awards, and Student Ambassadors.",
+  stub:"The four source pages exist but their content was not retrievable. This page needs: what field and experiential courses run, where students go, how internship credit works, what a capstone looks like, and what the ambassador program asks of students. It is also the page the homepage's fieldwork claim depends on, so it should carry named examples."
+});
+page("ug-advising", {
+  title:"Advising and contacts", kicker:"Undergraduate", url:"/anth/undergraduate/advising/",
+  prov:"This is the live \"Why anthropology?\" page under an accurate title. Its content is advising logistics, not recruitment.",
+  body:["Anthropology is the comparative study of human culture and society: how individuals and communities are shaped by their traditions, values, and institutions, understood in a global context."],
+  list:[
+    ["Undergraduate Academic Advisor","Jessica B. Kanoski, jkanoski@usc.edu"],
+    ["Director of Undergraduate Studies","anth-dus@dornsife.usc.edu"],
+    ["First-year students","fya@dornsife.usc.edu"],
+    ["Advise SC","Students may self-refer. Advisor availability can take 24 hours to appear after a referral."],
+    ["Undergraduate email list","For department events and news."]
+  ],
+  note:"The live site serves this same content at two URLs, /anth/undergraduate/ and /anth/undergraduate/why-anthropology/. One should redirect to the other. If the department wants a genuine \"Why anthropology?\" recruitment page, it needs to be written; this is not it."
+});
+
+/* ---------------- GRADUATE ---------------- */
+page("gr-phd", {
+  title:"PhD in Anthropology", kicker:"Graduate", url:"/anth/graduate/anthropology-phd-program/",
+  prov:"Carried over from the live PhD page. Admissions and funding split out to its own page below.",
+  body:[
+    "The department trains anthropologists who expand the discipline in theory, method, form, and community engagement. The program requires sustained engagement with social theory and in-depth ethnographic field research, while supporting new ways of conducting and sharing anthropological knowledge.",
+    "The reenvisioned program is grounded in critical engagement with the history, theory, and practice of anthropology, and supports students pursuing careers outside the academy as well as within it. Dissertations are expected to be formally innovative."
+  ],
+  list:[
+    ["Required coursework","ANTH 501 History and Foundations of Anthropology and ANTH 502 Contemporary Theory in Anthropology, four units each. Coursework totals at least 60 units, of which no more than 8 may be ANTH 794 Doctoral Dissertation."],
+    ["Practical training","Two or more units of ANTH 596 Internship for Curricular Practical Training, or equivalent coursework in other fields."]
+  ],
+  links:["gr-admissions","ppl-faculty"]
+});
+page("gr-admissions", {
+  title:"Admissions and funding", kicker:"Graduate", url:"/anth/graduate/admissions/",
+  prov:"Split out of the live PhD page, where the funding package sits partway down and is easy to miss. It is a recruitment asset and should stand alone.",
+  list:[
+    ["Fellowship package","A yearly stipend of $41,200 for AY 25-26, health and dental insurance, and most mandatory university fees."],
+    ["Structure of support","Two years of support with no other obligations, plus three additional years via graduate teaching fellowships."],
+    ["Information session","Held annually online. Prospective students meet the Director of Graduate Studies, the department chair, and other faculty. Recordings available on request from anthgrad@usc.edu."]
+  ],
+  flag:"The stipend figure is year-stamped and will need updating each cycle. Worth deciding who owns that."
+});
+page("gr-faculty", {
+  title:"Faculty in the doctoral program", kicker:"Graduate", url:"/anth/graduate/faculty/",
+  prov:"List taken directly from the live PhD program page.",
+  body:["Faculty actively involved in leading the PhD program: Andrea Ballestero, Fiori Berhane, Janet Hoskins, Nancy Lutkehaus, Meredith McLaughlin, Joanne Nucho, Hrag Papazian, Peter Redfield, Luisa Reis Castro, and Stephanie Spray."],
+  note:"Andrew Lakoff appears on this list on the live site. Removed here pending the chair's decision on how his passing is handled across the site.",
+  links:["res-areas"]
+});
+page("gr-alumni", {
+  title:"Alumni and placements", kicker:"Graduate", url:"/anth/graduate/alumni/",
+  prov:"Moved here from the People menu, where it sat despite already having a /graduate/ URL.",
+  stub:"Source page content not retrieved. Placement outcomes are the single most persuasive thing a doctoral page can carry, so this deserves real data rather than a name list."
+});
+
+/* ---------------- PEOPLE ---------------- */
+page("ppl-faculty", {
+  title:"Faculty", kicker:"People", url:"/anth/people/faculty/",
+  prov:"Names and titles from the live directory. The live version paginates across two pages with no research information visible until you open each profile.",
+  list:[
+    ["Andrea Ballestero","Associate Professor. Political and legal anthropology, STS, social studies of finance. Directs the Ethnography Studio."],
+    ["Fiori Berhane","Assistant Professor. African refugees, the Central Mediterranean crossing, Eritrean activism in Italy."],
+    ["Jennifer Cool","Associate Professor (Teaching). Digital media ecologies, ethnographic film, social theory of the posthuman."],
+    ["Eric Heller","Lecturer."],
+    ["Janet Hoskins","Religion, visual anthropology, and material culture in Southeast Asia. Transpacific studies."],
+    ["Lanita Jacobs","American Studies and Ethnicity and Anthropology. Linguistic anthropology."],
+    ["Dorinne Kondo","Professor of American Studies and Ethnicity and Anthropology."],
+    ["Nancy Lutkehaus","Melanesian gender and social organization, political and economic anthropology, visual culture, art and cultures of Oceania."],
+    ["Tracie Mayfield","Lecturer."],
+    ["Meredith McLaughlin","Assistant Professor. Social policy, economic development, and livelihoods in India and the United States."],
+    ["Erin Moore","Professor (Teaching)."],
+    ["Joanne Nucho","Associate Professor and chair of the department. Politics of the built environment and infrastructure, visual ethnography, filmmaking."],
+    ["Hrag Papazian","Turpanjian Early Career Chair in Contemporary Armenian Studies and Assistant Professor. Subjectivity and politics in post-genocide societies."],
+    ["Peter Redfield","Robert F. Erburu Chair in Ethics, Globalization and Development, Professor of Anthropology and History. Science, technology, and medicine in colonial and postcolonial contexts."],
+    ["Luisa Reis-Castro","Assistant Professor. Science, health, and environment; multispecies ethnography; Brazil."],
+    ["Stephanie Spray","Associate Professor of Anthropology and Cinematic Arts. Ethnography and art, visual and sonic anthropology. Directs CEMA."],
+    ["Tok Thompson","Professor (Teaching). Folklore, mythology, sociolinguistics."],
+    ["Kristiana Willsey","Lecturer. Folklore, fairy tales, personal narrative."],
+    ["Emily Zeamer","Associate Professor (Teaching). Director of Undergraduate Studies."]
+  ],
+  flag:"Titles for faculty on the second page of the live directory were assembled from other department pages and should be verified against personnel records before publishing. Andrew Lakoff is not listed here; see the note under In memoriam."
+});
+page("ug-awards", {
+  title:"Honors and awards", kicker:"Undergraduate", url:"/anth/undergraduate/honors-and-awards/",
+  prov:"Built from the department's own Capstone Awards page and the Archaeology program's award recognition page. Reorganized by year so the record accumulates instead of being overwritten each spring.",
+  body:["Each year the department recognizes outstanding senior capstone work across Anthropology and Global Studies, alongside contributions to the life of the department. Award winners are selected by the instructors of ANTH 411 and ANTH 485 together with faculty advisors and readers."],
+  blocks:[
+    ["2025", [
+      ["Benjamin Harris-Myers, Anthropology Capstone Thesis Award","Refuge, Resistance and Resilience: Taco Stands in Los Angeles. Two years of ethnographic fieldwork including dozens of interviews with taco stand workers and owners across Los Angeles, with the project reframed over time to account for shifts in immigration policy. Advised by Tracie Mayfield."],
+      ["Galilea Marquez, Anthropology Capstone Thesis Award","Answers in the Night Sky: Astrology, Disenchantment, and the Modern World. Advised by Xochitl Ruiz."],
+      ["Christina Chkarboul, Global Studies Capstone Thesis Award","TikTok's Political Witches: How Spellcasting Powers Resistance. Based on analysis of WitchTok and interviews with practitioners of Neopagan magic. Advised by Thomas Ward."],
+      ["Beatrix Heard, Global Studies Capstone Thesis Award","Comparing Civic Life and Governance Structures in Co-op City and the José Pedro Varela Complex. International interviews and Spanish-language sources on housing cooperatives in New York and Uruguay. Advised by Andrea Ballestero."],
+      ["Audrey Joachim, Community Builder Award","Given for extraordinary contributions to the life of the department, to students whose participation in and facilitation of campus events enriches the experience of their peers."],
+      ["Xinyan Mia Tong, First Prize, Academic Writing","Social and Hard Sciences and Business category, USC Undergraduate Writers' Conference."]
+    ]],
+    ["2024", [
+      ["USC Undergraduate Research Symposium","Four archaeology and anthropology students were recognized at the 25th annual symposium on April 18, 2024, for mentored research in the Arts and Humanities and Social Sciences categories. Each received an award and a cash prize."]
+    ]],
+    ["Honors in Anthropology", [
+      ["Eligibility","A cumulative GPA of 3.5 both university-wide and in courses counting toward the major, plus an honors thesis certified as honors level by two faculty readers in Anthropology. The honors thesis is expected to exceed the standard capstone, judged on the quality of the argument and supporting material rather than length."]
+    ]]
+  ],
+  flag:"The 2024 symposium winners are named on the Archaeology program's site but were not retrievable here; add the four names. Earlier years are missing entirely. Worth deciding how far back the record should run and who updates it each spring.",
+  out:[
+    ["Capstone awards, current year","https://dornsife.usc.edu/anth/capstone-awards/"],
+    ["All capstone projects","https://dornsife.usc.edu/anth/capstone-projects/"],
+    ["Archaeology award recognition","https://dornsife.usc.edu/arch/award-recognition/"]
+  ]
+});
+page("ppl-emeriti", {
+  title:"Emeriti faculty", kicker:"People", url:"/anth/people/emeriti/",
+  prov:"New page, but not new content. The live faculty directory already has an Emeritus Faculty filter, so the roster exists in the CMS; it is simply not reachable as a page of its own.",
+  body:["Faculty who have retired from active teaching and continue to be associated with the department."],
+  stub:"The roster needs to be pulled from the directory's Emeritus Faculty filter. Emeriti entries are worth more than a name and a former title: many have long publication records, archives, and students still working in their areas, and this is the page where that continuity is visible.",
+  flag:"Decide whether this page is distinct from In memoriam or whether the two share one page. They answer different questions, so separate pages are usually cleaner, but only if both are maintained.",
+  out:[["Faculty directory, filterable by category","https://dornsife.usc.edu/anth/people/faculty/"]]
+});
+page("ppl-memoriam", {
+  title:"In memoriam", kicker:"People", url:"/anth/people/in-memoriam/",
+  prov:"New page, proposed rather than assumed.",
+  flag:"Andrew Lakoff remains on the live faculty directory. Whether the department wants a memorial page, an in-memoriam note on the directory, or something else is the chair's call, not a web decision. This page is a placeholder for that conversation."
+});
+page("ppl-phd", {title:"PhD students", kicker:"People", url:"/anth/people/phd-students/", prov:"Existing page, carried over.", stub:"Roster content not retrieved."});
+page("ppl-post", {title:"Postdoctoral scholars", kicker:"People", url:"/anth/people/postdoctoral-scholars/", prov:"Existing page, carried over.", stub:"Roster content not retrieved."});
+page("ppl-staff", {title:"Staff", kicker:"People", url:"/anth/people/staff/", prov:"Existing page, carried over.", stub:"Roster content not retrieved."});
+
+/* ---------------- COURSES ---------------- */
+page("courses", {
+  title:"Courses", kicker:"Courses", url:"/anth/courses-in-anthropology/",
+  prov:"Carried over from the live Courses page.",
+  body:[
+    "Coursework lets students explore the social and cultural dimensions of problems shaping the present: globalization, migration, media, climate, and health.",
+    "Students learn the major concepts, questions, and theoretical approaches of anthropology and the humanistic social sciences, and how to apply them to the description and analysis of social life. Courses build the skills needed to work across cultural difference and to carry out qualitative research in anthropology's participant-observation tradition."
+  ],
+  list:[["Course prefix","ANTH in the USC Course Catalogue."]],
+  list2head:"Featured courses",
+  list2:[
+    ["ANTH 314g The Nature of Maya Civilization","Traces Maya society from its early foundations through the political transformations of the Terminal Classic, drawing on archaeology, hieroglyphic decipherment, iconography, and the relationship between built and natural landscapes. Students work directly with primary evidence and develop a creative research project reconstructing a historical episode at a major center such as Copán, Calakmul, Palenque, or Tikal."],
+    ["ANTH 321 Space, Place, Perception and Power","Examines how spaces, places, and landscapes are socially produced, and how they shape embodied experience, identity, and relations of power. The course is built around a field practicum sequence in which students work through the phenomenology of space, spatial mapping, research ethics, motility and field notes, and ethnographic interviewing, alongside student-led discussion of the readings."]
+  ],
+  note:"The live page promises a selection of newest and most exciting offerings. ANTH 314g is included here as a sample of that format. If the section stays, it needs an owner and a refresh cadence, or the framing should be dropped. Confirm the course number and general education designation against the catalogue before publishing."
+});
+
+/* ---------------- ABOUT ---------------- */
+page("about-dept", {
+  title:"About the department", kicker:"About", url:"/anth/about/",
+  prov:"Rewritten. The live version's degree inventory conflicts with the Majors & Minors overview, so the inventory has been removed here and this page now links to that page instead of restating it.",
+  body:[
+    "Anthropology brings a global comparative perspective to the study of human beings, across both time and space. It connects to many other fields across the social sciences, humanities, and natural sciences, as well as to professional training.",
+    "USC's department is known for its pioneering role in visual anthropology, and that work continues through the Center for Ethnographic Media Arts and the Visual Anthropology major."
+  ],
+  note:"Removed from the live version of this page: the 5th-year M.A. in visual anthropology, which is not currently active, and a list of concentrations and minors that does not match the Majors & Minors overview.",
+  links:["ug-majors","res-centers"]
+});
+page("about-contact", {
+  title:"Administration and contact", kicker:"About", url:"/anth/about/contact/",
+  prov:"Department roles carried over from the live page and corrected. Hub staff added from the Dornsife Social Sciences Hub directory, filtered to those whose supporting departments include ANTH.",
+  list:[
+    ["Department","University of Southern California, 3620 S. Vermont Ave., KAP 352, Los Angeles, CA 90089-2537. (213) 740-1900. anthro@dornsife.usc.edu"],
+    ["Chair","Joanne Nucho, nucho@usc.edu"],
+    ["Director of Undergraduate Studies","Emily Zeamer, Anth-DUS@dornsife.usc.edu"],
+    ["Director of Graduate Studies","Andrea Ballestero, aballes@usc.edu"],
+    ["Undergraduate advising","Jessica B. Kanoski, (213) 740-2534, jkanoski@usc.edu"]
+  ],
+  list2head:"Dornsife Academic Services Hub",
+  list2:[
+    ["Jamie Remmers, Academic Program Director","remmers@usc.edu, THH 309. Covers anthropology along with the other social sciences departments."],
+    ["Melissa Beatty, Academic Program Manager","hernandm@usc.edu, HSH 314C. Covers anthropology, history, and sociology. Faculty affairs, including RTPC and tenure-track dossiers, faculty recruitment, course scheduling and staffing, and website content."],
+    ["Karin Amundsen, Academic Program Administrator","kamundse@usc.edu, DMC 330C. Covers anthropology, history, linguistics, and political science. Classroom assignments, course scheduling, catalogue updates, grader and TA assignment, scheduling coordination."],
+    ["Simone Bessant, Office Manager","bessant@usc.edu, SOS 153C. Purchasing and supplies, building and office access, facilities requests, budget reports, reimbursements, purchase orders, and stipend requests."],
+    ["Monica Prado Garcia, Associate Dean, Academic Services","monicapr@usc.edu, ADM 304. Hub leadership."]
+  ],
+  note:"Corrected from the live page: Joanne Nucho added as chair; Olivia Ale, Jennifer Cool, and Darlene Garza removed.",
+  flag:"Three things to verify. The Administrative Assistant I post covering anthropology is listed as vacant, so that line is omitted here. No one in the hub's PhD Recruitment and Advising group lists ANTH among their supporting departments, which may be a gap or may be handled inside the department. And the hub directory shows Melissa Beatty's address as hernandm@usc.edu, which does not match her name; confirm before publishing. Peter Redfield also still appears on the live page, likely as the previous chair."
+});
+
+/* ---------------- NAV ---------------- */
+const LIVE = [
+  {label:"Events", page:"res-news", kids:[]},
+  {label:"Research", kids:[
+    {label:"Research areas", page:"res-areas"},
+    {label:"Centers and labs", page:"res-centers"}
+  ]},
+  {label:"Undergraduate", kids:[
+    {label:"Majors and minors", page:"ug-majors"},
+    {label:"Beyond the classroom", page:"ug-beyond"},
+    {label:"Honors and awards", page:"ug-awards"},
+    {label:"Advising and contacts", page:"ug-advising"}
+  ]},
+  {label:"Graduate", kids:[
+    {label:"PhD in Anthropology", page:"gr-phd"},
+    {label:"Admissions and funding", page:"gr-admissions"},
+    {label:"Faculty in the doctoral program", page:"gr-faculty"},
+    {label:"Alumni and placements", page:"gr-alumni"}
+  ]},
+  {label:"People", kids:[
+    {label:"Faculty", page:"ppl-faculty"},
+    {label:"Postdoctoral scholars", page:"ppl-post"},
+    {label:"PhD students", page:"ppl-phd"},
+    {label:"Staff", page:"ppl-staff"},
+    {label:"Emeriti faculty", page:"ppl-emeriti"},
+    {label:"In memoriam", page:"ppl-memoriam"}
+  ]},
+  {label:"Courses", page:"courses", kids:[]},
+  {label:"About", kids:[
+    {label:"About the department", page:"about-dept"},
+    {label:"Administration and contact", page:"about-contact"}
+  ]}
+];
+
+const FIXES = [
+  "Degree inventory now lives on one page only. The About page conflicted with the Majors & Minors overview; About has been rewritten to link rather than restate.",
+  "The paused M.A. in Visual Anthropology removed from the Graduate menu and from the About page, where it also appeared.",
+  "\"Why anthropology?\" renamed \"Advising and contacts\", which is what its content actually is. The duplicate URL at /anth/undergraduate/ collapses into it.",
+  "Experiential Learning, Internships, Capstone Projects, and Student Ambassadors merged into one page, Beyond the classroom.",
+  "Alumni moved from People to Graduate, matching its existing /graduate/ URL.",
+  "Admissions and funding split out of the PhD page so the fellowship package is findable.",
+  "Events promoted to a top-level section at the head of the bar, combining the event calendar with Latest News. The news page exists on the live site but is currently reachable from no department menu.",
+  "Resources removed from the public menu. It holds faculty forms and guidelines and belongs behind MyDornsife or in the footer.",
+  "New Research section created. The live site has no research pages at all, which is why the homepage had to carry the department's entire research identity in one sentence of subfield nouns.",
+  "The CEMA menu label shortened to Centers and labs. The live label runs to eleven words.",
+  "Administration and contact corrected: Joanne Nucho listed as chair; Olivia Ale, Jennifer Cool, and Darlene Garza removed. Dornsife Social Sciences Hub staff covering anthropology added, with what each one handles.",
+  "Archaeology & Heritage Studies added as a sixth research area, as a degree on the Majors and minors page, and as a center via the Archaeology Research Center. The program is active under a name the department's own pages have not caught up with; the About page still calls it Interdisciplinary Archaeology and the Majors & Minors overview omits it."
+];
+
+let nav, open = null, cur = "home";
+const clone = o => JSON.parse(JSON.stringify(o));
+const stamp = n => { n.kids = n.kids || []; n.orig = n.label; n.kids.forEach(stamp); return n; };
+function load(){ nav = clone(LIVE).map(stamp); }
+load();
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function tags(pid){
+  const p = P[pid]; if (!p) return "";
+  let t = "";
+  if (p.stub) t += '<span class="tag t-stub">STUB</span>';
+  if (p.flag) t += '<span class="tag t-flag">CHECK</span>';
+  return t;
+}
+
+function renderMenu(){
+  const ul = document.createElement("ul");
+  ul.className = "bar";
+  const shown = nav.filter(s => !s.hidden);
+  nav.forEach((sec, i) => {
+    if (sec.hidden) return;
+    const li = document.createElement("li");
+    if (shown.indexOf(sec) >= Math.ceil(shown.length / 2)) li.className = "r";
+    const kids = sec.kids.filter(k => !k.hidden);
+    const b = document.createElement("button");
+    b.className = "mitem";
+    if (kids.length) b.setAttribute("aria-expanded", open === i ? "true" : "false");
+    b.innerHTML = `<span>${esc(sec.label)}</span>` + (kids.length ? `<span class="car">▾</span>` : "");
+    b.onclick = e => { e.stopPropagation(); if (kids.length){ open = open===i?null:i; renderMenu(); } else if (sec.page){ open=null; cur = sec.page; renderMenu(); drawPage(); } };
+    li.appendChild(b);
+    if (kids.length){
+      const sub = document.createElement("ul"); sub.className = "sub";
+      if (open !== i) sub.hidden = true;
+      kids.forEach(k => {
+        const kl = document.createElement("li"), kb = document.createElement("button");
+        kb.innerHTML = esc(k.label) + tags(k.page);
+        kb.onclick = e => { e.stopPropagation(); open = null; cur = k.page; renderMenu(); drawPage(); window.scrollTo(0,0); };
+        kl.appendChild(kb); sub.appendChild(kl);
+      });
+      li.appendChild(sub);
+    }
+    ul.appendChild(li);
+  });
+  const m = $("menu"); m.innerHTML = ""; m.appendChild(ul);
+}
+document.addEventListener("click", () => { if (open !== null){ open = null; renderMenu(); } });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && open !== null){ open = null; renderMenu(); } });
+
+function drawPage(){
+  const p = P[cur]; const el = $("page"); if (!p) return;
+  let h = `<p class="crumb">dornsife.usc.edu${esc(p.url)}</p><p class="kicker">${esc(p.kicker)}</p><h2>${esc(p.title)}</h2>`;
+  if (p.prov) h += `<p class="prov"><b>Source.</b> ${esc(p.prov)}</p>`;
+  if (p.stub) h += `<p class="stubbox"><b>Stub.</b> ${esc(p.stub)}</p>`;
+  (p.body||[]).forEach(t => h += `<p>${esc(t)}</p>`);
+  if (p.list){
+    h += `<ul class="plain">` + p.list.map(([a,b]) => `<li><b>${esc(a)}</b>${b?`<em>${esc(b)}</em>`:""}</li>`).join("") + `</ul>`;
+  }
+  if (p.blocks){
+    p.blocks.forEach(([head, items]) => {
+      h += `<h3>${esc(head)}</h3><ul class="plain">` + items.map(([a,b]) => `<li><b>${esc(a)}</b>${b?`<em>${esc(b)}</em>`:""}</li>`).join("") + `</ul>`;
+    });
+  }
+  if (p.out){
+    h += `<h3>Links out</h3><ul class="plain">` + p.out.map(([t,u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener" style="color:var(--cardinal)">${esc(t)}</a><em>${esc(u)}</em></li>`).join("") + `</ul>`;
+  }
+  if (p.list2){
+    h += `<h3>${esc(p.list2head||"")}</h3><ul class="plain">` + p.list2.map(([a,b]) => `<li><b>${esc(a)}</b>${b?`<em>${esc(b)}</em>`:""}</li>`).join("") + `</ul>`;
+  }
+  if (p.note) h += `<p class="note"><b>Editorial note.</b> ${esc(p.note)}</p>`;
+  if (p.flag) h += `<p class="note"><b>Open question.</b> ${esc(p.flag)}</p>`;
+  if (p.links && p.links.length){
+    h += `<h3>Related</h3><ul class="plain">` + p.links.map(id => `<li><button class="xlink" data-go="${id}">${esc(P[id].title)}</button></li>`).join("") + `</ul>`;
+  }
+  if (p.contact){
+    h += `<h3>Contact</h3><p style="font-size:14px">Department of Anthropology · (213) 740-1900 · anthro@dornsife.usc.edu</p>`;
+  }
+  el.innerHTML = h;
+  el.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { cur = b.dataset.go; drawPage(); window.scrollTo(0,0); });
+}
+
+/* editor */
+let pendingDel = null, newSeq = 0;
+
+function newPage(title, kicker){
+  const id = "new-" + (++newSeq);
+  P[id] = {id, title, kicker, url:"/anth/" + title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") + "/",
+    prov:"Added in the menu editor. Not on the live site.",
+    stub:"New page. Needs a title, a URL, and content before it can go anywhere."};
+  return id;
+}
+
+function renderEditor(){
+  const e = $("editor"); e.innerHTML = "";
+  nav.forEach((sec,i) => {
+    const g = document.createElement("div"); g.className = "grp";
+    g.appendChild(row(sec,i,null,true));
+    sec.kids.forEach((k,j) => g.appendChild(row(k,j,i,false)));
+    const w = document.createElement("div"); w.className = "addwrap";
+    const a = document.createElement("button"); a.className = "add";
+    a.textContent = "+ add page under " + sec.label;
+    a.onclick = () => {
+      const t = "New page";
+      sec.kids.push({label:t, page:newPage(t, sec.label), kids:[]});
+      pendingDel = null; draw();
+    };
+    w.appendChild(a); g.appendChild(w);
+    e.appendChild(g);
+  });
+  const w = document.createElement("div");
+  const a = document.createElement("button"); a.className = "add addsec";
+  a.textContent = "+ add menu section";
+  a.onclick = () => {
+    const t = "New section";
+    nav.push({label:t, orig:t, page:newPage(t, t), kids:[]});
+    pendingDel = null; open = null; draw();
+  };
+  w.appendChild(a); e.appendChild(w);
+}
+
+function row(item, idx, parent, isHead){
+  const list = parent === null ? nav : nav[parent].kids;
+  const r = document.createElement("div");
+  r.className = (isHead?"grphead":"row child") + (item.hidden?" off":"");
+
+  if (isHead && pendingDel === idx){
+    r.className += " pending";
+    const n = item.kids.length;
+    const warn = document.createElement("span"); warn.className = "warn";
+    warn.textContent = n
+      ? `Remove “${item.label}” and the ${n} page${n>1?"s":""} under it?`
+      : `Remove “${item.label}”?`;
+    r.appendChild(warn);
+    const del = mk("Remove", () => { list.splice(idx,1); pendingDel=null; open=null; draw(); });
+    del.className = "btn danger"; r.appendChild(del);
+    const no = mk("Keep", () => { pendingDel=null; renderEditor(); });
+    no.className = "btn wide"; r.appendChild(no);
+    return r;
+  }
+
+  const inp = document.createElement("input");
+  inp.className = "lbl"; inp.value = item.label;
+  inp.oninput = () => { item.label = inp.value; renderMenu(); };
+  r.appendChild(inp);
+  r.appendChild(mk("↑", () => move(list,idx,-1), idx===0));
+  r.appendChild(mk("↓", () => move(list,idx,1), idx===list.length-1));
+  const eye = mk(item.hidden?"◌":"◉", () => { item.hidden=!item.hidden; pendingDel=null; draw(); });
+  if (item.hidden) eye.classList.add("on");
+  eye.title = "Hide or show";
+  r.appendChild(eye);
+  if (isHead){
+    const x = mk("×", () => { pendingDel = idx; renderEditor(); });
+    x.title = "Remove section"; r.appendChild(x);
+  } else {
+    r.appendChild(mk("×", () => { list.splice(idx,1); open=null; draw(); }));
+  }
+  return r;
+}
+function mk(t,fn,dis){ const b=document.createElement("button"); b.className="btn"; b.textContent=t; b.disabled=!!dis; b.onclick=fn; return b; }
+function move(list,i,d){ const j=i+d; if(j<0||j>=list.length) return; [list[i],list[j]]=[list[j],list[i]]; open=null; pendingDel=null; draw(); }
+
+/* notes */
+function renderNotes(){
+  const ids = new Set(); nav.forEach(s => { if (s.page) ids.add(s.page); s.kids.forEach(k => ids.add(k.page)); });
+  ids.add("home");
+  const all = [...ids].filter(Boolean).map(i => P[i]).filter(Boolean);
+  const stubs = all.filter(p => p.stub), flags = all.filter(p => p.flag);
+  $("n-pages").textContent = all.length;
+  $("n-stub").textContent = stubs.length;
+  $("n-flag").textContent = flags.length;
+  $("l-fix").innerHTML = FIXES.map(f => `<li>${esc(f)}</li>`).join("");
+  $("l-flag").innerHTML = flags.map(p => `<li><b>${esc(p.title)}.</b> ${esc(p.flag)}</li>`).join("") || `<li>None.</li>`;
+  $("l-stub").innerHTML = stubs.map(p => `<li><b>${esc(p.title)}.</b> ${esc(p.stub)}</li>`).join("") || `<li>None.</li>`;
+}
+
+function draw(){ renderMenu(); renderEditor(); renderNotes(); }
+
+const tabs = [["t-site","p-site"],["t-edit","p-edit"],["t-notes","p-notes"],["t-share","p-share"]];
+tabs.forEach(([t,p]) => $(t).onclick = () => {
+  tabs.forEach(([t2,p2]) => { $(t2).setAttribute("aria-selected", t2===t); $(p2).hidden = t2!==t; });
+  if (t==="t-notes") renderNotes(); if (t==="t-share") renderLayouts();
+  window.scrollTo(0,0);
+});
+$("tonotes").onclick = () => $("t-notes").click();
+$("reset").onclick = () => { load(); open=null; pendingDel=null; cur="home"; draw(); drawPage(); };
+
+$("ioout").onclick = async () => {
+  const txt = JSON.stringify(nav.map(s => ({
+    label:s.label, orig:s.orig, page:s.page, hidden:!!s.hidden,
+    kids:s.kids.map(k => ({label:k.label, orig:k.orig, page:k.page, hidden:!!k.hidden}))
+  })), null, 1);
+  $("io").value = txt;
+  try { await navigator.clipboard.writeText(txt); $("iomsg").textContent = "Copied to the clipboard, and shown above. Keep it somewhere safe."; }
+  catch { $("iomsg").textContent = "Shown above. Select it and copy manually."; }
+};
+
+$("ioin").onclick = () => {
+  const raw = $("io").value.trim();
+  if (!raw){ $("iomsg").textContent = "Paste a saved structure into the box first."; return; }
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch { $("iomsg").textContent = "That is not valid JSON. Paste the whole block, including the outer brackets."; return; }
+  if (!Array.isArray(parsed) || !parsed.length || !parsed.every(s => s && typeof s.label === "string")){
+    $("iomsg").textContent = "That JSON is not a menu structure. Each section needs at least a label."; return;
+  }
+  nav = parsed.map(s => ({
+    label:s.label, orig:s.orig || s.label, page:s.page, hidden:!!s.hidden,
+    kids:(s.kids||[]).map(k => ({label:k.label, orig:k.orig || k.label, page:k.page, hidden:!!k.hidden}))
+  }));
+  const missing = [];
+  nav.forEach(s => { if (s.page && !P[s.page]) missing.push(s.label);
+    s.kids.forEach(k => { if (k.page && !P[k.page]) missing.push(k.label); }); });
+  open = null; pendingDel = null; cur = "home"; draw(); drawPage();
+  $("iomsg").textContent = missing.length
+    ? `Loaded. These items have no page in this file, so they open blank: ${missing.join(", ")}.`
+    : "Loaded. The Site tab now shows this structure.";
+};
+$("hb").onclick = () => { cur="home"; open=null; draw(); drawPage(); window.scrollTo(0,0); };
+
+/* ---------- layouts: shared by link, no account needed ---------- */
+let layouts = [];
+
+function structureOf(n){
+  return n.map(s => ({l:s.label, o:s.orig||s.label, p:s.page||null, h:s.hidden?1:0,
+    k:(s.kids||[]).map(k=>({l:k.label, o:k.orig||k.label, p:k.page||null, h:k.hidden?1:0}))}));
+}
+function inflate(st){
+  return (st||[]).map(s => ({label:s.l, orig:s.o||s.l, page:s.p, hidden:!!s.h,
+    kids:(s.k||[]).map(k=>({label:k.l, orig:k.o||k.l, page:k.p, hidden:!!k.h}))}));
+}
+function enc(obj){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function dec(str){
+  const b = str.replace(/-/g,"+").replace(/_/g,"/");
+  return JSON.parse(decodeURIComponent(escape(atob(b + "===".slice((b.length+3)%4)))));
+}
+function payload(name, note){ return {n:name, t:note||"", d:new Date().toISOString().slice(0,10), s:structureOf(nav)}; }
+
+function addLayout(o, quiet){
+  if (!o || !Array.isArray(o.s)) return false;
+  const key = (o.n||"") + "|" + o.d;
+  if (!layouts.some(x => (x.n||"")+"|"+x.d === key)) layouts.push(o);
+  if (!quiet) renderLayouts();
+  return true;
+}
+
+function renderLayouts(){
+  const wrap = $("layouts"); if (!wrap) return;
+  if (!layouts.length){
+    wrap.innerHTML = '<div class="card"><h3>No layouts collected yet</h3><ul><li>Save your own above, or paste a colleague\u2019s link or JSON into the box to add theirs.</li></ul></div>';
+    return;
+  }
+  let h = "";
+  layouts.forEach((L,i) => {
+    const st = L.s || [];
+    const pages = st.reduce((n,x)=>n+(x.k?x.k.length:0),0);
+    h += '<div class="grp">'
+      + '<div class="grphead"><span class="lbl" style="font-weight:700">' + esc(L.n||"Unnamed") + '</span>'
+      + '<span class="warn" style="flex:none;color:var(--dim)">' + esc(L.d||"") + '</span></div>'
+      + '<div class="addwrap" style="background:var(--surface)">'
+      + (L.t ? '<p class="hint" style="margin:0 0 7px">' + esc(L.t) + '</p>' : '')
+      + '<p class="hint" style="margin:0 0 7px"><b>' + st.length + '</b> sections, <b>' + pages + '</b> pages<br>'
+      + esc(st.map(x=>x.l).join("  \u00b7  ")) + '</p>'
+      + '<div class="actions" style="margin-top:0">'
+      + '<button class="ghost" data-load="' + i + '">Load into editor</button>'
+      + '<button class="ghost" data-drop="' + i + '">Remove</button>'
+      + '</div></div></div>';
+  });
+
+  const labels = [];
+  layouts.forEach(L => (L.s||[]).forEach(x => { if (!labels.includes(x.l)) labels.push(x.l); }));
+  h += '<div class="card"><h3>Where each section sits</h3><div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;min-width:100%">'
+    + '<tr><th style="text-align:left;padding:5px 9px 5px 0;font-weight:500;color:var(--dim)">Section</th>'
+    + layouts.map(L=>'<th style="text-align:center;padding:5px 7px;font-weight:500;color:var(--dim);white-space:nowrap">'+esc((L.n||"?").split(" ")[0])+'</th>').join("")
+    + '</tr>';
+  labels.forEach(lab => {
+    h += '<tr><td style="padding:5px 9px 5px 0;border-top:1px dotted var(--rule);white-space:nowrap">'+esc(lab)+'</td>'
+      + layouts.map(L => {
+          const i = (L.s||[]).findIndex(x=>x.l===lab);
+          return '<td style="text-align:center;padding:5px 7px;border-top:1px dotted var(--rule);color:'+(i<0?"var(--dim)":"var(--ink)")+'">'+(i<0?"\u2014":(i+1))+'</td>';
+        }).join("") + '</tr>';
+  });
+  h += '</table></div></div>';
+  h += '<div class="actions"><button class="ghost" id="lay-all">Copy all as JSON</button></div>';
+  wrap.innerHTML = h;
+
+  wrap.querySelectorAll("[data-load]").forEach(b => b.onclick = () => {
+    nav = inflate(layouts[+b.dataset.load].s);
+    open=null; pendingDel=null; cur="home"; draw(); drawPage(); $("t-site").click();
+  });
+  wrap.querySelectorAll("[data-drop]").forEach(b => b.onclick = () => {
+    layouts.splice(+b.dataset.drop,1); renderLayouts();
+  });
+  const all = $("lay-all");
+  if (all) all.onclick = async () => {
+    const txt = JSON.stringify(layouts);
+    try { await navigator.clipboard.writeText(txt); all.textContent = "Copied"; setTimeout(()=>all.textContent="Copy all as JSON",1400); }
+    catch { $("sv-msg").textContent = "Copy failed. Use Copy structure in the Menu editor instead."; }
+  };
+}
+
+$("sv-go").onclick = async () => {
+  const msg = $("sv-msg");
+  const name = $("sv-name").value.trim();
+  if (!name){ msg.textContent = "Add your name first, so the committee can tell the layouts apart."; return; }
+  const o = payload(name, $("sv-note").value.trim());
+  addLayout(o);
+  const link = location.origin + location.pathname + "#layout=" + enc(o);
+  $("sv-io").value = link;
+  try { await navigator.clipboard.writeText(link); msg.textContent = "Link copied. Send it to whoever is collecting layouts; opening it loads your arrangement."; }
+  catch { msg.textContent = "Link is in the box below. Copy it and send it on."; }
+};
+
+$("sv-add").onclick = () => {
+  const msg = $("sv-msg");
+  const raw = $("sv-io").value.trim();
+  if (!raw){ msg.textContent = "Paste a colleague\u2019s link or JSON into the box first."; return; }
+  let ok = false;
+  try {
+    if (raw.includes("#layout=")) ok = addLayout(dec(raw.split("#layout=")[1]));
+    else {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length && parsed[0] && parsed[0].s){ parsed.forEach(x=>addLayout(x,true)); renderLayouts(); ok = true; }
+      else ok = addLayout(parsed);
+    }
+  } catch(e){ ok = false; }
+  msg.textContent = ok ? "Added to the comparison below." : "That did not look like a layout link or layout JSON.";
+  if (ok) $("sv-io").value = "";
+};
+
+(function fromHash(){
+  const m = location.hash.match(/#layout=(.+)$/);
+  if (!m) return;
+  try {
+    const o = dec(m[1]);
+    if (o && Array.isArray(o.s)){
+      addLayout(o, true);
+      nav = inflate(o.s); open=null; pendingDel=null; cur="home";
+      setTimeout(() => { draw(); drawPage(); const el=$("sv-msg"); if (el) el.textContent = "Loaded " + (o.n||"a colleague") + "\u2019s layout from the link."; }, 0);
+    }
+  } catch(e){}
+})();
+
+draw(); drawPage();
+renderLayouts();
+</script>
+</body>
+</html>
