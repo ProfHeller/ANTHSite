@@ -57,17 +57,21 @@ Menu editor changes only your browser session.
 
 The **Layouts** tab is for comparing arrangements across several people. Each
 person opens the page, rearranges the menu in the Menu editor, enters their name
-under Layouts and presses **Save and copy my link**. That produces an ordinary
-URL with the whole arrangement encoded in it, which they email to whoever is
-collecting them. Opening the link loads that person's layout.
+under Layouts and presses **Save my layout as a file**. That writes a small JSON
+file to their downloads folder, named for them and the date, which they email to
+whoever is collecting layouts.
 
-To build the comparison, paste each incoming link into the box and press **Add a
-colleague's**. The table at the bottom shows where every section sits in each
-person's version. **Copy all as JSON** saves the whole collection so it survives
-a refresh.
+To build the comparison, use **Open layout files from your computer** and select
+one or several at once. The table at the bottom shows where every section sits in
+each person's version. **Save all as one file** writes the whole collection out
+as a single JSON file; opening that file later restores the comparison.
 
-No accounts, sign-in, or server are involved; the layout travels in the URL. The
-collection itself lives in the browser tab, so export it before closing.
+**Copy my link** is the alternative when email attachments are awkward: it encodes
+the whole arrangement in a URL, and opening that URL loads the layout. Links point
+at wherever this page is hosted, so settle on a home before circulating them.
+
+No accounts, sign-in, or server are involved. The collection lives in the browser
+tab, so save it to a file before closing.
 
 The Menu editor also has **Copy structure** and **Load structure** for moving a
 single arrangement in and out as JSON.

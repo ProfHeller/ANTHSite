@@ -159,15 +159,22 @@
 
 
 <section class="panel" id="p-share" role="tabpanel" hidden>
-  <p class="hint">Each committee member arranges the menu in the Menu editor, then saves it here. Saving produces a link that carries the whole arrangement, so it can be emailed to whoever is collecting them. No account or sign-in is involved. Opening someone's link loads their layout straight into the editor.</p>
+  <p class="hint">Each committee member arranges the menu in the Menu editor, then saves it here. Saving writes a small JSON file to their downloads folder, which they email to whoever is collecting layouts. Open those files here to build the comparison. No account, sign-in, or server is involved. A copyable link works too, if email attachments are awkward.</p>
   <div class="grp">
     <div class="grphead"><span class="warn" style="color:var(--dim)">Save the arrangement currently in the Menu editor</span></div>
     <div class="addwrap">
       <input id="sv-name" class="lbl" style="border-color:var(--rule);width:100%;margin-bottom:6px" placeholder="Your name">
       <input id="sv-note" class="lbl" style="border-color:var(--rule);width:100%" placeholder="Optional: what you were trying to fix">
       <div class="actions" style="margin-top:7px">
-        <button id="sv-go">Save and copy my link</button>
-        <button class="ghost" id="sv-add">Add a colleague's</button>
+        <button id="sv-go">Save my layout as a file</button>
+        <button class="ghost" id="sv-link">Copy my link</button>
+      </div>
+      <div class="actions" style="margin-top:7px">
+        <label class="add" for="sv-file" style="display:block;text-align:center;cursor:pointer;line-height:1.6">Open layout files from your computer</label>
+        <input type="file" id="sv-file" accept=".json,application/json" multiple style="display:none">
+      </div>
+      <div class="actions" style="margin-top:7px">
+        <button class="ghost" id="sv-add">Add from pasted link or JSON</button>
       </div>
       <textarea id="sv-io" rows="3" placeholder="Your link appears here after saving. To add someone else's, paste their link or JSON and press Add a colleague's." style="width:100%;margin-top:7px;font-family:var(--mono);font-size:11px;border:1px solid var(--rule);border-radius:4px;padding:7px;resize:vertical"></textarea>
       <p class="hint" id="sv-msg" style="margin:7px 0 0"></p>
@@ -782,7 +789,7 @@ function renderLayouts(){
         }).join("") + '</tr>';
   });
   h += '</table></div></div>';
-  h += '<div class="actions"><button class="ghost" id="lay-all">Copy all as JSON</button></div>';
+  h += '<div class="actions"><button class="ghost" id="lay-all">Save all as one file</button></div>';
   wrap.innerHTML = h;
 
   wrap.querySelectorAll("[data-load]").forEach(b => b.onclick = () => {
@@ -794,10 +801,55 @@ function renderLayouts(){
   });
   const all = $("lay-all");
   if (all) all.onclick = async () => {
-    const txt = JSON.stringify(layouts);
-    try { await navigator.clipboard.writeText(txt); all.textContent = "Copied"; setTimeout(()=>all.textContent="Copy all as JSON",1400); }
-    catch { $("sv-msg").textContent = "Copy failed. Use Copy structure in the Menu editor instead."; }
+    const r = await saveJSON("anth-layouts-all-" + new Date().toISOString().slice(0,10) + ".json", layouts);
+    $("sv-msg").textContent = r === "saved"
+      ? "All " + layouts.length + " layouts saved to your downloads. Open that file later to restore the comparison."
+      : "Could not save a file here.";
   };
+}
+
+function slug(t){ return (t||"layout").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40) || "layout"; }
+
+async function saveJSON(filename, obj){
+  const data = JSON.stringify(obj, null, 1);
+  try {
+    if (window.claude && typeof claude.use === "function"){
+      const d = await claude.use("downloads");
+      if (d){ await d.save({filename, data}); return "saved"; }
+    }
+  } catch(e){ if (e && e.code === "cancelled") return "cancelled"; }
+  try {
+    const url = URL.createObjectURL(new Blob([data], {type:"application/json"}));
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return "saved";
+  } catch(e){ return "failed"; }
+}
+
+function readFiles(files){
+  const msg = $("sv-msg");
+  let done = 0, added = 0, bad = 0;
+  [...files].forEach(f => {
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const parsed = JSON.parse(r.result);
+        if (Array.isArray(parsed)) parsed.forEach(x => { if (addLayout(x, true)) added++; });
+        else if (addLayout(parsed, true)) added++;
+        else bad++;
+      } catch(e){ bad++; }
+      if (++done === files.length){
+        renderLayouts();
+        msg.textContent = added
+          ? added + " layout" + (added>1?"s":"") + " added to the comparison below." + (bad ? " " + bad + " file could not be read." : "")
+          : "None of those files looked like a layout.";
+      }
+    };
+    r.onerror = () => { bad++; if (++done === files.length){ renderLayouts(); msg.textContent = "Could not read that file."; } };
+    r.readAsText(f);
+  });
 }
 
 $("sv-go").onclick = async () => {
@@ -806,11 +858,26 @@ $("sv-go").onclick = async () => {
   if (!name){ msg.textContent = "Add your name first, so the committee can tell the layouts apart."; return; }
   const o = payload(name, $("sv-note").value.trim());
   addLayout(o);
+  const fn = "anth-layout-" + slug(name) + "-" + o.d + ".json";
+  const r = await saveJSON(fn, o);
+  msg.textContent = r === "saved"
+    ? "Saved to your downloads as " + fn + ". Email that file to whoever is collecting layouts."
+    : (r === "cancelled" ? "Save cancelled." : "Could not save a file here. Use Copy my link instead.");
+};
+
+$("sv-link").onclick = async () => {
+  const msg = $("sv-msg");
+  const name = $("sv-name").value.trim();
+  if (!name){ msg.textContent = "Add your name first."; return; }
+  const o = payload(name, $("sv-note").value.trim());
+  addLayout(o);
   const link = location.origin + location.pathname + "#layout=" + enc(o);
   $("sv-io").value = link;
-  try { await navigator.clipboard.writeText(link); msg.textContent = "Link copied. Send it to whoever is collecting layouts; opening it loads your arrangement."; }
+  try { await navigator.clipboard.writeText(link); msg.textContent = "Link copied. Opening it loads your arrangement."; }
   catch { msg.textContent = "Link is in the box below. Copy it and send it on."; }
 };
+
+$("sv-file").onchange = e => { if (e.target.files && e.target.files.length) readFiles(e.target.files); e.target.value = ""; };
 
 $("sv-add").onclick = () => {
   const msg = $("sv-msg");
