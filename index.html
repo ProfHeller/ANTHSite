@@ -290,8 +290,7 @@ page("ug-advising", {
   prov:"This is the live \"Why anthropology?\" page under an accurate title. Its content is advising logistics, not recruitment.",
   body:["Anthropology is the comparative study of human culture and society: how individuals and communities are shaped by their traditions, values, and institutions, understood in a global context."],
   list:[
-    ["Undergraduate Academic Advisor","Jessica B. Kanoski, jkanoski@usc.edu"],
-    ["Director of Undergraduate Studies","anth-dus@dornsife.usc.edu"],
+    ["Director of Undergraduate Studies","Emily Zeamer, Anth-DUS@dornsife.usc.edu"],
     ["First-year students","fya@dornsife.usc.edu"],
     ["Advise SC","Students may self-refer. Advisor availability can take 24 hours to appear after a referral."],
     ["Undergraduate email list","For department events and news."]
@@ -327,7 +326,7 @@ page("gr-faculty", {
   title:"Faculty in the doctoral program", kicker:"Graduate", url:"/anth/graduate/faculty/",
   prov:"List taken directly from the live PhD program page.",
   body:["Faculty actively involved in leading the PhD program: Andrea Ballestero, Fiori Berhane, Janet Hoskins, Nancy Lutkehaus, Meredith McLaughlin, Joanne Nucho, Hrag Papazian, Peter Redfield, Luisa Reis Castro, and Stephanie Spray."],
-  note:"Andrew Lakoff appears on this list on the live site. Removed here pending the chair's decision on how his passing is handled across the site.",
+  note:"Andrew Lakoff appears on this list on the live site. He is not listed here; the department has decided to honor him on the In memoriam page, which links to his memorial.",
   links:["res-areas"]
 });
 page("gr-alumni", {
@@ -361,7 +360,7 @@ page("ppl-faculty", {
     ["Kristiana Willsey","Lecturer. Folklore, fairy tales, personal narrative."],
     ["Emily Zeamer","Associate Professor (Teaching). Director of Undergraduate Studies."]
   ],
-  flag:"Titles for faculty on the second page of the live directory were assembled from other department pages and should be verified against personnel records before publishing. Andrew Lakoff is not listed here; see the note under In memoriam."
+  flag:"Titles for faculty on the second page of the live directory were assembled from other department pages and should be verified against personnel records before publishing. Andrew Lakoff is not listed here; the department has decided to honor him on the In memoriam page, which links to his memorial."
 });
 page("ug-awards", {
   title:"Honors and awards", kicker:"Undergraduate", url:"/anth/undergraduate/honors-and-awards/",
@@ -400,8 +399,10 @@ page("ppl-emeriti", {
 });
 page("ppl-memoriam", {
   title:"In memoriam", kicker:"People", url:"/anth/people/in-memoriam/",
-  prov:"New page, proposed rather than assumed.",
-  flag:"Andrew Lakoff remains on the live faculty directory. Whether the department wants a memorial page, an in-memoriam note on the directory, or something else is the chair's call, not a web decision. This page is a placeholder for that conversation."
+  prov:"New page. The department has decided to honor Andy by linking to his memorial.",
+  body:["Andrew Lakoff, Professor of Sociology and Anthropology, died on July 7 after a brief illness. He joined USC in 2009, served as Divisional Dean for the Social Sciences in Dornsife, and in 2020 founded the Center on Science, Technology, and Public Life. His work reshaped how social scientists understand global health, medicine, expertise, and the politics of preparedness."],
+  out:[["Remembering Andrew Lakoff, Center on Science, Technology, and Public Life","https://dornsife.usc.edu/stpl/"]],
+  flag:"The remembrance sits on the STPL center's front page rather than at a URL of its own, so this link will go stale when that page is next updated. Worth asking STPL for a permanent link, or writing the department's own text here and linking out as a secondary source."
 });
 page("ppl-phd", {title:"PhD students", kicker:"People", url:"/anth/people/phd-students/", prov:"Existing page, carried over.", stub:"Roster content not retrieved."});
 page("ppl-post", {title:"Postdoctoral scholars", kicker:"People", url:"/anth/people/postdoctoral-scholars/", prov:"Existing page, carried over.", stub:"Roster content not retrieved."});
@@ -442,8 +443,7 @@ page("about-contact", {
     ["Department","University of Southern California, 3620 S. Vermont Ave., KAP 352, Los Angeles, CA 90089-2537. (213) 740-1900. anthro@dornsife.usc.edu"],
     ["Chair","Joanne Nucho, nucho@usc.edu"],
     ["Director of Undergraduate Studies","Emily Zeamer, Anth-DUS@dornsife.usc.edu"],
-    ["Director of Graduate Studies","Andrea Ballestero, aballes@usc.edu"],
-    ["Undergraduate advising","Jessica B. Kanoski, (213) 740-2534, jkanoski@usc.edu"]
+    ["Director of Graduate Studies","Andrea Ballestero, aballes@usc.edu"]
   ],
   list2head:"Dornsife Academic Services Hub",
   list2:[
@@ -503,7 +503,9 @@ const FIXES = [
   "New Research section created. The live site has no research pages at all, which is why the homepage had to carry the department's entire research identity in one sentence of subfield nouns.",
   "The CEMA menu label shortened to Centers and labs. The live label runs to eleven words.",
   "Administration and contact corrected: Joanne Nucho listed as chair; Olivia Ale, Jennifer Cool, and Darlene Garza removed. Dornsife Social Sciences Hub staff covering anthropology added, with what each one handles.",
-  "Archaeology & Heritage Studies added as a sixth research area, as a degree on the Majors and minors page, and as a center via the Archaeology Research Center. The program is active under a name the department's own pages have not caught up with; the About page still calls it Interdisciplinary Archaeology and the Majors & Minors overview omits it."
+  "Archaeology & Heritage Studies added as a sixth research area, as a degree on the Majors and minors page, and as a center via the Archaeology Research Center. The program is active under a name the department's own pages have not caught up with; the About page still calls it Interdisciplinary Archaeology and the Majors & Minors overview omits it.",
+  "Jessica B. Kanoski removed from Advising and contacts and from Administration and contact. Emily Zeamer named as Director of Undergraduate Studies on the advising page, which previously gave the role a generic address and no name.",
+  "Andrew Lakoff honored on a new In memoriam page that links to the remembrance published by the Center on Science, Technology, and Public Life. He is not restored to the faculty directory or the doctoral faculty list."
 ];
 
 let nav, open = null, cur = "home";
